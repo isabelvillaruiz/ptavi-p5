@@ -84,25 +84,86 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
 
 9. Fijémonos en las tramas siguientes a la número 46:
  ** ¿Se registra con éxito en el primer intento?
+    No
  ** ¿Cómo sabemos si el registro se ha realizado correctamente o no?
- ** ¿Podrías identificar las diferencias entre el primer intento y el segundo de registro? (fíjate en el tamaño de los paquetes y mira a qué se debe el cambio)
- ** ¿Cuánto es el valor del tiempo de expiración de la sesión? Indica las unidades.
+    Aqui no se realiza correctamente:
+    50	7.425202	86.64.162.35	192.168.1.34	SIP	714	Status: 401 Unauthorized    (0 bindings) | 
+    Aqui si se realiza correctamente:
+    54	7.512211	86.64.162.35	192.168.1.34	SIP	664	Status: 200 OK    (1 bindings) | 
+    
+    En el primer intento no lo consigue porque tienen que realizar el proceso de Auteticacion en SIP
+    a través del desafío Digest.
 
+ ** ¿Podrías identificar las diferencias entre el primer intento y el segundo de registro? (fíjate en el tamaño de los paquetes y mira a qué se debe el cambio)
+
+    Lenght = 1ºintento 468  / 2ºintento 678 
+
+    En el primer intento no viene incluido el proceso de Autenticacion en el segundo intento si:
+
+    Authentication Scheme: Digest
+    Digest username="grex", 
+    realm="ekiga.net", 
+    nonce="45a439ee7438aaea43ae8c7c2382922187f86c8b",
+    uri="sip:ekiga.net", 
+    algorithm=md5,
+    response="5267d4e49d707d4443baefa913e8ff90"
+    Nonce Value: "45a439ee7438aaea43ae8c7c2382922187f86c8b"
+
+    Eso provocca que el tamaño del mensaje sea mayor en el segundo intento
+
+ ** ¿Cuánto es el valor del tiempo de expiración de la sesión? Indica las unidades.
+    3600s
 
 10. Una vez registrados, podemos efectuar una llamada. Vamos a probar con el servicio de eco de Ekiga que nos permite comprobar si nos hemos conectado correctamente. El servicio de eco tiene la dirección sip:500@ekiga.net. Veamos el INVITE de cerca.
  ** ¿Puede verse el nombre del que efectúa la llamada, así como su dirección SIP?
+    From: "Gregorio Robles" <sip:grex@ekiga.net>;tag=621be956-b29e-db11-82ee-0013ce8c7c2b
+    SIP from address User Part: grex
+    --> SIP from address: sip:grex@ekiga.net
+
  ** ¿Qué es lo que contiene el cuerpo de la trama? ¿En qué formato/protocolo está?
- ** ¿Tiene éxito el primer intento? ¿Cómo lo sabes?
+    
+    SDP La descripcion del mensaje SDP
+    
+    v=0
+    o=- 1168390274 1168390274 IN IP4 83.36.48.212
+    s=Opal SIP Session
+    c=IN IP4 83.36.48.212
+    t=0 0
+    m=audio 5002 RTP/AVP 101 96 3 107 110 0 8
+    a=rtpmap:101 telephone-event/8000
+    a=fmtp:101 0-15
+    a=rtpmap:96 SPEEX/16000
+    a=rtpmap:3 GSM/8000
+    a=rtpmap:107 MS-GSM/8000
+    a=rtpmap:110 SPEEX/8000
+    a=rtpmap:0 PCMU/8000
+    a=rtpmap:8 PCMA/8000
+    m=video 5006 RTP/AVP 31
+    a=rtpmap:31 H261/90000
+
+
+
+
+ ** ¿Tiene éxito el primer intento? ¿Cómo lo sabes? 
+    No 407 Proxy Authentication Required 
+    Como en la previa comunicacion del REGISTER de SIP, tiene un proceso de autenticacion de por medio
+    antes de poner realizar la accion completa. Utilizan Digest.
  ** ¿En qué se diferencia el segundo INVITE más abajo del primero? ¿A qué crees que se debe esto?
+    El segundo INVITE ya viene con la resolucion del Digest entre usuario y servidor. 
 
-
+        ---DUDA--
 11. Una vez conectado, estudia el intercambio de tramas.
  ** ¿Qué protocolo(s) se utiliza(n)? ¿Para qué sirven estos protocolos?
+    RTP
  ** ¿Cuál es el tamaño de paquete de los mismos?
+    214 bytes
  ** ¿Se utilizan bits de padding?
+    0   
  ** ¿Cuál es la periodicidad de los paquetes que se envían?
+    Aproximadamente caca 0.0204 segundos.
  ** ¿Cuántos bits/segundo estamos enviando?
-
+    1712 cada 0.0204 segundos
+    
 
 
 [Al terminar el ejercicio es recomendable hacer commit de los ficheros modificados]
