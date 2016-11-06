@@ -67,7 +67,7 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
  ** ¿Por qué crees que se hace uso de este protocolo en esta captura? Busca en la Wikipedia.
     Buscamos la direccion publica de los clientes NAT.
  ** ¿Estamos tras un NAT?
-        ---DUDA---
+    Ya que utilizamos STUN estamos tras un Nat.
 
 8. La trama 46 es la primera trama SIP. En un entorno como el de Internet, lo habitual es desconocer la dirección IP de la otra parte al realizar una llamada. Por eso, todo usuario registra su localización en un servidor Registrar. El Registrar guarda información sobre los usuarios en un servidor de localización que puede ser utilizado para localizar usuarios.
  ** ¿Qué dirección IP tiene el servidor Registrar?
@@ -151,18 +151,23 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
  ** ¿En qué se diferencia el segundo INVITE más abajo del primero? ¿A qué crees que se debe esto?
     El segundo INVITE ya viene con la resolucion del Digest entre usuario y servidor. 
 
-        ---DUDA--
+     
 11. Una vez conectado, estudia el intercambio de tramas.
  ** ¿Qué protocolo(s) se utiliza(n)? ¿Para qué sirven estos protocolos?
-    RTP
+    RTP / H.261 / RTCP.
+    RTP: transmision de táfico multimedia a tiempo real.
+    H.261: es un compresor ITU de video.
+    RTCP: proporciona informacion sobre la calidad de la transmision.
  ** ¿Cuál es el tamaño de paquete de los mismos?
-    214 bytes
+    214 bytes(RTP)  
+    Varian segun el paquete(H:261 y RTCP)
  ** ¿Se utilizan bits de padding?
-    0   
+    0   (NO)
  ** ¿Cuál es la periodicidad de los paquetes que se envían?
-    Aproximadamente caca 0.0204 segundos.
+    Aproximadamente cada 0.0204 segundos.
  ** ¿Cuántos bits/segundo estamos enviando?
-    1712 cada 0.0204 segundos
+    1712 cada 0.0204 segundos 
+    --DUDA--
     
 
 
