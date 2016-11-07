@@ -164,10 +164,12 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
  ** ¿Se utilizan bits de padding?
     0   (NO)
  ** ¿Cuál es la periodicidad de los paquetes que se envían?
-    Aproximadamente cada 0.0204 segundos.
+    G.711 usa 64kbps de velocidad de trasmision. Sabiendo que la carga util son 160 bytes:
+    64000/(8*160) siendo 8 la Fs el resultado nos da 50 siendo el periodo 1/50 :    
+    Aproximadamente cada 0.02 segundos.
  ** ¿Cuántos bits/segundo estamos enviando?
-    1712 cada 0.0204 segundos 
-    --DUDA--
+    64000bps
+    
     
 
 
@@ -222,7 +224,8 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
  ** ¿Cuánto dura la conversación?
     24.80289 s
  ** ¿Cuáles son sus SSRC? ¿Por qué hay varios SSRCs? ¿Hay CSRCs?
-    --NO SE ME ABRE GRAPH NI FLOW--
+    Hay dos SSRC ( RTP(h.261) y RTP(g.711))
+    No hay CSRC.
 
 15. Identifica la trama donde se finaliza la conversación.
  ** ¿Qué método SIP se utiliza?
@@ -230,8 +233,8 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
  ** ¿En qué trama(s)?
     En las tramas: 924 / 925 / 927 / 933
  ** ¿Por qué crees que se envía varias veces?
-    En UDP puede haber perdidas y manda varios por si acaso no le llegan al server.
-
+    En UDP puede haber perdidas y manda varios por si acaso no le llegan al server aunque en este caso
+    llegan todos correctamente.
 16. Finalmente, se cierra la aplicación de VozIP.
  ** ¿Por qué aparece una instrucción SIP del tipo REGISTER?
     Para borrar del registro al usuario
@@ -252,16 +255,26 @@ Captura una sesión SIP de una conversación con el número SIP sip:9999@qxip.ne
 
 17. Observa las diferencias en el inicio de la conversación entre el entorno del laboratorio y el del ejercicio anterior:
  ** ¿Es necesario el uso de DNS y STUN? ¿Por qué?
+    No es necesario porque el servidor se encuentra dentro de mi red local.
  ** ¿Son diferentes el registro y la descripción de la sesión?
-
+    Si porque el campo Allow tiene nuevas implementaciones:
+    Allow: INVITE, ACK, OPTIONS, BYE, CANCEL, SUBSCRIBE, NOTIFY, REFER, MESSAGE, INFO, PING, PRACK
+    Ademas tenemos mensajes PUBLISH con informacion adicional. 
 
 18. Identifica las diferencias existentes entre esta conversación y la conversación anterior:
  ** ¿Cuántos flujos tenemos?
+    Varios. Dependiendo de las condiciones tendremos mas o menos.
  ** ¿Cuál es su periodicidad?
+    La misma que en nuestra captura. 0.02
  ** ¿Cuánto es el valor máximo del delta y los valores medios y máximo del jitter?
+    Foward: MaxDelta= 61.78ms MeanJitter= 1.41ms MaxJitter= 6.55ms
+    Reverse:MaxDelta= 323.77ms MeanJitter= 39.99ms MaxJitter= 49.49ms
  ** ¿Podrías reproducir la conversación desde Wireshark? ¿Cómo? Comprueba que poniendo un valor demasiado pequeño para el buffer de jitter, la conversación puede no tener la calidad necesaria.
- ** ¿Sabrías decir qué tipo de servicio ofrece sip:9999@qxip.net?
+    Telephony>VoIPCalls>Play>Decode
+    Con un buffer de jitter pequeño se escucha peor que con uno mayor.
 
+ ** ¿Sabrías decir qué tipo de servicio ofrece sip:music@iptel.org?
+    Musica en streaming
 
 
 [Al terminar el ejercicio es recomendable hacer commit de los ficheros modificados]
