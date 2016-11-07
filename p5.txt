@@ -22,7 +22,7 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
 
 3. Antes de analizar las tramas, mira las estadísticas generales que aparecen en el menú de Statistics. En el apartado de jerarquía de protocolos (Protocol Hierarchy) se puede ver el porcentaje del tráfico correspondiente al protocolo TCP y UDP.
  ** ¿Cuál de los dos es mayor? ¿Es esto consistente con una aplicación que transmite en tiempo real?
-    96.23%(UDP) y 2.10% (TCP) // 
+    96.23%(UDP) y 2.10% (TCP) // Si porque las aplicaciones a tiempo real van sobre UDP.
  ** ¿Qué otros protocolos podemos ver en la jerarquía de protocolos?
     DNS,RTP,Classic-STUN,H.261,RTCP,SIP
 
@@ -30,10 +30,10 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
  ** Filtra por sip para conocer cuándo se envían paquetes SIP. ¿En qué segundos tienen lugar esos envíos?
     7.34-7.425-7.427-7.50-7.55-7.64-14.42-14.59-14.61-16.23-16.33-16.34-16.45-38.11-38.36-38.362
     38093-39.15-39.17-39.20-39.22-55.69-55.774-55.776-55.85
-    EN TOTAL : 25 CAPTURAS SIP
+    EN TOTAL : 25 PAQUETES SIP
  ** Y los paquetes con RTP, ¿cuándo se envían?
     Empiezan en el segundo 17 y acaban en el 38.
-
+    EN TOTAL : 807 PAQUETES RTP de 2  flujos diferentes.
 
 [Al terminar el ejercicio es recomendable hacer commit de los ficheros modificados]
 
@@ -60,14 +60,16 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
     Line-based text data: text/html
     83.36.48.212
  ** Si lanzamos el navegador web, por ejemplo, Mozilla Firefox, y vamos a la misma URL, ¿qué recibimos? ¿Qué es, entonces, lo que está respondiendo el servidor?
-    IP = 193.147.77.70 
+    IP = 193.147.77.70  (Pública)
 
 
 7. Hasta la trama 45 se puede observar una secuencia de tramas del protocolo STUN.
  ** ¿Por qué crees que se hace uso de este protocolo en esta captura? Busca en la Wikipedia.
     Buscamos la direccion publica de los clientes NAT.
  ** ¿Estamos tras un NAT?
-    Ya que utilizamos STUN estamos tras un Nat.
+    Ya que nuestro servidor esta fuera de nuestra red local STUN es utilizada para
+    facilitar la direccion NAT pública y poder configurar la llamada de ese proovedor fuera 
+    de la red local.
 
 8. La trama 46 es la primera trama SIP. En un entorno como el de Internet, lo habitual es desconocer la dirección IP de la otra parte al realizar una llamada. Por eso, todo usuario registra su localización en un servidor Registrar. El Registrar guarda información sobre los usuarios en un servidor de localización que puede ser utilizado para localizar usuarios.
  ** ¿Qué dirección IP tiene el servidor Registrar?
@@ -100,14 +102,14 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
 
     En el primer intento no viene incluido el proceso de Autenticacion en el segundo intento si:
 
-    Authentication Scheme: Digest
-    Digest username="grex", 
-    realm="ekiga.net", 
-    nonce="45a439ee7438aaea43ae8c7c2382922187f86c8b",
-    uri="sip:ekiga.net", 
+    Authorization: 
+    Digest username="grex",
+    realm="ekiga.net",
+    nonce="45a439ee7438aaea43ae8c7c2382922187f86c8b", 
+    uri="sip:ekiga.net",
     algorithm=md5,
     response="5267d4e49d707d4443baefa913e8ff90"
-    Nonce Value: "45a439ee7438aaea43ae8c7c2382922187f86c8b"
+
 
     Eso provocca que el tamaño del mensaje sea mayor en el segundo intento
 
@@ -160,11 +162,12 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
     RTCP: proporciona informacion sobre la calidad de la transmision.
  ** ¿Cuál es el tamaño de paquete de los mismos?
     214 bytes(RTP)  
-    Varian segun el paquete(H:261 y RTCP)
+    Varian segun el paquete(H.261 y RTCP)
  ** ¿Se utilizan bits de padding?
-    0   (NO)
+    ..0. .... = Padding: False (NO)
  ** ¿Cuál es la periodicidad de los paquetes que se envían?
-    G.711 usa 64kbps de velocidad de trasmision. Sabiendo que la carga util son 160 bytes:
+    Sabemos que utiliza un decodificador G.711 usa 64kbps de velocidad de trasmision.
+    Sabiendo que la carga util son 160 bytes:
     64000/(8*160) siendo 8 la Fs el resultado nos da 50 siendo el periodo 1/50 :    
     Aproximadamente cada 0.02 segundos.
  ** ¿Cuántos bits/segundo estamos enviando?
@@ -184,7 +187,8 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
     Duration 20,95 s (-16928 ms clock drift, corresponding to 17276 Hz (-80,80%)
 
  ** ¿Cuántos flujos hay? ¿por qué?
-    196 paquetes RTP
+    Hay dos flujos de mensajes RTP
+    G.711 para la codificacion del audio y H.261 para la compresion del video.
  ** ¿Cuántos paquetes se pierden? 
     0.00%
  ** ¿Cuál es el valor máximo del delta? 
@@ -206,13 +210,14 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
     ITU-T G.711 PCMA (8) Frecuencia de muestreo 8K/Hz y usa para comprimir/descomprimir PCMA.
     
  ** ¿Cuánto valen el delta y el jitter para el primer paquete que ha llegado?
-    0
+    0 porque no tenemos para comparar temporalmente aún.
  ** ¿Podemos saber si éste es el primer paquete que nos han enviado?
-    El primero es el 113
+    El primero es el 113 (1... .... = Marker: True)
  ** Los valores de jitter son menores de 10ms hasta un paquete dado. ¿Cuál?
     247
  ** ¿A qué se debe el cambio tan brusco del jitter?
-    Hay una diferencia de medio segundo entre es paquete y el anterior.?
+    Hay una diferencia de medio segundo entre es paquete y el anterior. Es decir
+    viene relacionado con el aumento del valor de la Delta que es considerablemente mayor.
  ** ¿Es comparable este cambio con el tiempo desde la recepción del paquete anterior? ¿Por qué?
     Ya que la delta es la diferencia entre la llegada de este paquete y la llegada del paquete anterior cuanto mayor
     sea el valor de la Delta mayor sera el valor del Jitter.
@@ -224,7 +229,7 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
  ** ¿Cuánto dura la conversación?
     24.80289 s
  ** ¿Cuáles son sus SSRC? ¿Por qué hay varios SSRCs? ¿Hay CSRCs?
-    Hay dos SSRC ( RTP(h.261) y RTP(g.711))
+    Hay dos SSRC ( RTP(h.261) y RTP(g.711))(2 flujos)
     No hay CSRC.
 
 15. Identifica la trama donde se finaliza la conversación.
@@ -237,11 +242,11 @@ Se ha capturado una sesión SIP (archivo sip.cap.gz), que se puede abrir con Wir
     llegan todos correctamente.
 16. Finalmente, se cierra la aplicación de VozIP.
  ** ¿Por qué aparece una instrucción SIP del tipo REGISTER?
-    Para borrar del registro al usuario
+    Para borrar del registro al usuario con Expires = 0.
  ** ¿En qué trama sucede esto?
     En la trama 950
  ** ¿En qué se diferencia con la instrucción que se utilizó con anterioridad (al principio de la sesión)?
-    En el Expires con valor 0 para borrarlo de la lista.
+    En el Expires con valor 0 para borrarlo de la lista y en el primero el Expires era de 3600.
 
 
 [Al terminar el ejercicio es recomendable hacer commit de los ficheros modificados]
@@ -263,7 +268,9 @@ Captura una sesión SIP de una conversación con el número SIP sip:9999@qxip.ne
 
 18. Identifica las diferencias existentes entre esta conversación y la conversación anterior:
  ** ¿Cuántos flujos tenemos?
-    Varios. Dependiendo de las condiciones tendremos mas o menos.
+    Vemos que hay dos flujos uno desde nosotros y otro en direccion contraria.
+    Desde 212.128.254.147 ( yo : isabelvillaruiz@ekiga.net) --> 212.79.111.55 ( music@iptel.org)
+    y en la direecion contraria.
  ** ¿Cuál es su periodicidad?
     La misma que en nuestra captura. 0.02
  ** ¿Cuánto es el valor máximo del delta y los valores medios y máximo del jitter?
